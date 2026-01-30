@@ -263,6 +263,21 @@
             cursor: not-allowed;
         }
         
+        .video-link {
+            display: block;
+            margin-top: 10px;
+            color: #ff9a56;
+            text-decoration: none;
+            font-size: 0.9em;
+            padding: 8px;
+            transition: color 0.2s;
+        }
+        
+        .video-link:hover {
+            color: #ffb380;
+            text-decoration: underline;
+        }
+        
         /* Audio notification indicator */
         .audio-status {
             font-size: 0.8em;
@@ -305,6 +320,7 @@
         
         <div class="settings-toggle">
             <button onclick="toggleSettings()">⚙️ Customize Routine</button>
+            <a href="https://www.youtube.com/shorts/jJ3dJe6ff2Q" target="_blank" class="video-link">📺 Watch: Hip Rotation Mobility Guide</a>
         </div>
         
         <div class="settings-panel" id="settingsPanel">
