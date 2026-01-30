@@ -242,6 +242,27 @@
             text-align: center;
         }
         
+        .reorder-btn {
+            padding: 2px 8px;
+            font-size: 0.7em;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 4px;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .reorder-btn:hover:not(:disabled) {
+            background: rgba(255,154,86,0.3);
+            color: #fff;
+        }
+        
+        .reorder-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
         /* Audio notification indicator */
         .audio-status {
             font-size: 0.8em;
@@ -518,11 +539,32 @@
         function renderSettings() {
             const container = document.getElementById('settingsItems');
             container.innerHTML = stretches.map((stretch, index) => `
-                <div class="setting-row">
-                    <span>${stretch.icon} ${stretch.name}</span>
+                <div class="setting-row" style="flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 200px;">
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <button class="reorder-btn" onclick="moveStretch(${index}, -1)" ${index === 0 ? 'disabled' : ''}>▲</button>
+                            <button class="reorder-btn" onclick="moveStretch(${index}, 1)" ${index === stretches.length - 1 ? 'disabled' : ''}>▼</button>
+                        </div>
+                        <span>${stretch.icon} ${stretch.name}</span>
+                    </div>
                     <input type="number" id="duration_${index}" value="${stretch.duration}" min="10" max="120">
                 </div>
             `).join('');
+        }
+        
+        function moveStretch(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= stretches.length) return;
+            
+            // Swap stretches
+            const temp = stretches[index];
+            stretches[index] = stretches[newIndex];
+            stretches[newIndex] = temp;
+            
+            // Save and re-render
+            localStorage.setItem('koStretches', JSON.stringify(stretches));
+            renderSettings();
+            renderStretchList();
         }
         
         function saveSettings() {
