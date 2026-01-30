@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ko's Stretch Timer 🧘</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #eee;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            background: linear-gradient(90deg, #ff9a56, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .timer-display {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .current-stretch {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #ff9a56;
+            min-height: 1.5em;
+        }
+        
+        .time {
+            font-size: 4em;
+            font-weight: 200;
+            font-variant-numeric: tabular-nums;
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #ff9a56, #ff6b6b);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        .stretch-counter {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #ff9a56, #ff6b6b);
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,107,107,0.3);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .stretch-list {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .stretch-list h2 {
+            font-size: 1em;
+            color: #888;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stretch-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .stretch-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stretch-item.active {
+            color: #ff9a56;
+        }
+        
+        .stretch-item.done {
+            color: #4ade80;
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        .stretch-icon {
+            width: 30px;
+            text-align: center;
+            margin-right: 12px;
+            font-size: 1.2em;
+        }
+        
+        .stretch-name {
+            flex: 1;
+        }
+        
+        .stretch-duration {
+            color: #888;
+            font-size: 0.9em;
+        }
+        
+        .complete-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .complete-message.show {
+            display: block;
+        }
+        
+        .complete-message h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #4ade80;
+        }
+        
+        .settings-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .settings-toggle button {
+            background: none;
+            color: #666;
+            padding: 10px;
+            font-size: 0.85em;
+        }
+        
+        .settings-toggle button:hover {
+            color: #888;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        .settings-panel {
+            display: none;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .settings-panel.show {
+            display: block;
+        }
+        
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+        }
+        
+        .setting-row input {
+            width: 60px;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1);
+            color: #eee;
+            text-align: center;
+        }
+        
+        /* Audio notification indicator */
+        .audio-status {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🧘 Ko's Stretch Timer</h1>
+            <p class="subtitle">Morning routine for back, knee & hip</p>
+        </header>
+        
+        <div class="timer-display">
+            <div class="current-stretch" id="currentStretch">Ready to stretch!</div>
+            <div class="time" id="timer">0:30</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="stretch-counter" id="stretchCounter">Stretch 0 of 8</div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn-secondary" id="skipBtn" disabled>Skip</button>
+            <button class="btn-primary" id="startBtn">Start Routine</button>
+            <button class="btn-secondary" id="resetBtn" disabled>Reset</button>
+        </div>
+        
+        <div class="complete-message" id="completeMessage">
+            <h2>🎉 Great job!</h2>
+            <p>You completed your stretches.<br>Your body thanks you!</p>
+        </div>
+        
+        <div class="stretch-list" id="stretchList">
+            <h2>Today's Routine</h2>
+            <div id="stretchItems"></div>
+        </div>
+        
+        <div class="settings-toggle">
+            <button onclick="toggleSettings()">⚙️ Customize Routine</button>
+        </div>
+        
+        <div class="settings-panel" id="settingsPanel">
+            <h3 style="margin-bottom: 15px; color: #ff9a56;">Stretch Durations (seconds)</h3>
+            <div id="settingsItems"></div>
+            <button class="btn-secondary" style="width: 100%; margin-top: 15px;" onclick="saveSettings()">Save Changes</button>
+        </div>
+    </div>
+    
+    <script>
+        // Ko's actual morning stretch routine (for lower back, knee, hip)
+        const defaultStretches = [
+            { name: "Toe Rotation Hip Stretch", duration: 45, icon: "⭐", desc: "Legs straight, point toes inward then outward, alternating" },
+            { name: "Heel-on-Foot (Left)", duration: 30, icon: "🦶", desc: "Right heel on left foot, point left foot inward" },
+            { name: "Heel-on-Foot (Right)", duration: 30, icon: "🦶", desc: "Left heel on right foot, point right foot inward" },
+            { name: "Figure-4 (Left)", duration: 30, icon: "4️⃣", desc: "Right ankle on left knee, lower right knee toward ground" },
+            { name: "Figure-4 (Right)", duration: 30, icon: "4️⃣", desc: "Left ankle on right knee, lower left knee toward ground" },
+            { name: "Bridge", duration: 30, icon: "🌉", desc: "Lift hips toward ceiling, squeeze glutes, hold" },
+        ];
+        
+        // Load stretches from localStorage or use defaults
+        let stretches = JSON.parse(localStorage.getItem('koStretches')) || defaultStretches;
+        
+        let currentStretchIndex = -1;
+        let timeLeft = 0;
+        let timerInterval = null;
+        let isRunning = false;
+        
+        // Audio context for beeps
+        let audioContext = null;
+        
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playBeep(frequency = 440, duration = 200, type = 'sine') {
+            if (!audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+        
+        function playStartSound() {
+            playBeep(523, 150); // C5
+            setTimeout(() => playBeep(659, 150), 150); // E5
+            setTimeout(() => playBeep(784, 200), 300); // G5
+        }
+        
+        function playNextSound() {
+            playBeep(440, 100);
+            setTimeout(() => playBeep(554, 150), 100);
+        }
+        
+        function playCompleteSound() {
+            playBeep(523, 150);
+            setTimeout(() => playBeep(659, 150), 150);
+            setTimeout(() => playBeep(784, 150), 300);
+            setTimeout(() => playBeep(1047, 300), 450);
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updateDisplay() {
+            document.getElementById('timer').textContent = formatTime(timeLeft);
+            
+            if (currentStretchIndex >= 0 && currentStretchIndex < stretches.length) {
+                const stretch = stretches[currentStretchIndex];
+                document.getElementById('currentStretch').textContent = stretch.name;
+                document.getElementById('stretchCounter').textContent = 
+                    `Stretch ${currentStretchIndex + 1} of ${stretches.length}`;
+                
+                const progress = ((stretch.duration - timeLeft) / stretch.duration) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            }
+            
+            renderStretchList();
+        }
+        
+        function renderStretchList() {
+            const container = document.getElementById('stretchItems');
+            container.innerHTML = stretches.map((stretch, index) => {
+                let className = 'stretch-item';
+                if (index === currentStretchIndex) className += ' active';
+                if (index < currentStretchIndex) className += ' done';
+                
+                return `
+                    <div class="${className}">
+                        <span class="stretch-icon">${stretch.icon}</span>
+                        <span class="stretch-name">${stretch.name}</span>
+                        <span class="stretch-duration">${stretch.duration}s</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function startRoutine() {
+            initAudio();
+            
+            if (currentStretchIndex === -1) {
+                currentStretchIndex = 0;
+                playStartSound();
+            }
+            
+            isRunning = true;
+            timeLeft = stretches[currentStretchIndex].duration;
+            
+            document.getElementById('startBtn').textContent = 'Pause';
+            document.getElementById('skipBtn').disabled = false;
+            document.getElementById('resetBtn').disabled = false;
+            document.getElementById('completeMessage').classList.remove('show');
+            document.getElementById('stretchList').style.display = 'block';
+            
+            updateDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 3 && timeLeft > 0) {
+                    playBeep(330, 80);
+                }
+                
+                if (timeLeft <= 0) {
+                    nextStretch();
+                } else {
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+        
+        function pauseRoutine() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').textContent = 'Resume';
+        }
+        
+        function nextStretch() {
+            clearInterval(timerInterval);
+            currentStretchIndex++;
+            
+            if (currentStretchIndex >= stretches.length) {
+                completeRoutine();
+                return;
+            }
+            
+            playNextSound();
+            timeLeft = stretches[currentStretchIndex].duration;
+            updateDisplay();
+            
+            if (isRunning) {
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    
+                    if (timeLeft <= 3 && timeLeft > 0) {
+                        playBeep(330, 80);
+                    }
+                    
+                    if (timeLeft <= 0) {
+                        nextStretch();
+                    } else {
+                        updateDisplay();
+                    }
+                }, 1000);
+            }
+        }
+        
+        function skipStretch() {
+            nextStretch();
+        }
+        
+        function completeRoutine() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            playCompleteSound();
+            
+            document.getElementById('completeMessage').classList.add('show');
+            document.getElementById('stretchList').style.display = 'none';
+            document.getElementById('startBtn').textContent = 'Start Again';
+            document.getElementById('currentStretch').textContent = 'Complete! 🎉';
+            document.getElementById('timer').textContent = '✓';
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('skipBtn').disabled = true;
+            
+            currentStretchIndex = -1;
+        }
+        
+        function resetRoutine() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            currentStretchIndex = -1;
+            timeLeft = 0;
+            
+            document.getElementById('startBtn').textContent = 'Start Routine';
+            document.getElementById('skipBtn').disabled = true;
+            document.getElementById('resetBtn').disabled = true;
+            document.getElementById('currentStretch').textContent = 'Ready to stretch!';
+            document.getElementById('timer').textContent = '0:30';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('stretchCounter').textContent = `Stretch 0 of ${stretches.length}`;
+            document.getElementById('completeMessage').classList.remove('show');
+            document.getElementById('stretchList').style.display = 'block';
+            
+            renderStretchList();
+        }
+        
+        function toggleSettings() {
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('show');
+            
+            if (panel.classList.contains('show')) {
+                renderSettings();
+            }
+        }
+        
+        function renderSettings() {
+            const container = document.getElementById('settingsItems');
+            container.innerHTML = stretches.map((stretch, index) => `
+                <div class="setting-row">
+                    <span>${stretch.icon} ${stretch.name}</span>
+                    <input type="number" id="duration_${index}" value="${stretch.duration}" min="10" max="120">
+                </div>
+            `).join('');
+        }
+        
+        function saveSettings() {
+            stretches.forEach((stretch, index) => {
+                const input = document.getElementById(`duration_${index}`);
+                stretch.duration = parseInt(input.value) || 30;
+            });
+            
+            localStorage.setItem('koStretches', JSON.stringify(stretches));
+            toggleSettings();
+            renderStretchList();
+            
+            // Show save confirmation
+            const btn = document.querySelector('.settings-panel button');
+            btn.textContent = 'Saved! ✓';
+            setTimeout(() => btn.textContent = 'Save Changes', 1500);
+        }
+        
+        // Event listeners
+        document.getElementById('startBtn').addEventListener('click', () => {
+            if (isRunning) {
+                pauseRoutine();
+            } else {
+                startRoutine();
+            }
+        });
+        
+        document.getElementById('skipBtn').addEventListener('click', skipStretch);
+        document.getElementById('resetBtn').addEventListener('click', resetRoutine);
+        
+        // Initial render
+        renderStretchList();
+        
+        // Calculate total time
+        const totalTime = stretches.reduce((sum, s) => sum + s.duration, 0);
+        document.querySelector('.subtitle').textContent = 
+            `Morning routine • ${Math.floor(totalTime / 60)}:${(totalTime % 60).toString().padStart(2, '0')} total`;
+    </script>
+</body>
+</html>
